@@ -197,12 +197,12 @@
                 try {
                     const payload = {
                         instances: [{
-                            prompt: prompt,
-                            width: width,
-                            height: height
+                            prompt: prompt
                         }],
                         parameters: {
-                            "sampleCount": 1
+                            "sampleCount": 1,
+                            "width": width,
+                            "height": height
                         }
                     };
 

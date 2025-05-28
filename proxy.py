@@ -15,18 +15,6 @@ def generate_image():
         api_key = 'AIzaSyBIUAoStzUUuJL2ZJ1D1xB1JvtCkDXlukY'
         api_url = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict'
         
-        # Garantir que os parâmetros de dimensão estejam no lugar correto
-        if 'instances' in data and len(data['instances']) > 0:
-            instance = data['instances'][0]
-            if 'width' in instance and 'height' in instance:
-                # Mover width e height para os parâmetros
-                data['parameters'] = data.get('parameters', {})
-                data['parameters']['width'] = instance['width']
-                data['parameters']['height'] = instance['height']
-                # Remover width e height da instância
-                del instance['width']
-                del instance['height']
-        
         # Fazer a requisição para a API do Google
         response = requests.post(
             f'{api_url}?key={api_key}',
