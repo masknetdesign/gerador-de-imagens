@@ -140,6 +140,10 @@
             API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict'
         };
 
+        // Determinar se estamos rodando localmente ou no GitHub Pages
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const proxyUrl = isLocalhost ? 'http://localhost:5000/generate-image' : 'https://cors-anywhere.herokuapp.com/https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict';
+
         document.addEventListener('DOMContentLoaded', () => {
             const promptInput = document.getElementById('promptInput');
             const aspectRatioSelect = document.getElementById('aspectRatioSelect');
@@ -208,10 +212,11 @@
 
                     console.log("Enviando payload:", JSON.stringify(payload, null, 2));
 
-                    const response = await fetch('http://localhost:5000/generate-image', {
+                    const response = await fetch(proxyUrl, {
                         method: 'POST',
                         headers: { 
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Origin': window.location.origin
                         },
                         body: JSON.stringify(payload)
                     });
