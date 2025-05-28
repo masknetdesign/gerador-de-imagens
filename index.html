@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Imagens</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXLLl9K6KQrppjg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -204,11 +204,10 @@
                         }
                     };
 
-                    const response = await fetch(`${config.API_URL}?key=${config.API_KEY}`, {
+                    const response = await fetch('http://localhost:5000/generate-image', {
                         method: 'POST',
                         headers: { 
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*'
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(payload)
                     });
