@@ -201,12 +201,12 @@
                         }],
                         parameters: {
                             "sampleCount": 1,
-                            "imageGenerationParams": {
-                                "width": width,
-                                "height": height
-                            }
+                            "width": width,
+                            "height": height
                         }
                     };
+
+                    console.log("Enviando payload:", JSON.stringify(payload, null, 2));
 
                     const response = await fetch('http://localhost:5000/generate-image', {
                         method: 'POST',
