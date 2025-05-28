@@ -22,4 +22,7 @@ yarn.lock
 # Arquivos de ambiente
 .env
 .env.local
-.env.*.local 
+.env.*.local
+
+# Configuração
+config.js 

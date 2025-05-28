@@ -103,7 +103,7 @@
                 id="promptInput"
                 class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                 placeholder="Descreva a imagem que você quer gerar..."
-            >A cozy and cheerful church cafeteria on a sunny afternoon. Volunteers are smiling and serving delicious, freshly fried Brazilian pastel to happy customers. A warm, welcoming atmosphere with colorful banners, a rustic counter, people chatting, and families enjoying snacks. Soft light enters through windows, pastel steam rises, and the scent of fried dough fills the air. The church is visible in the background, adding a community feel.</textarea>
+            ></textarea>
         </div>
 
         <div class="form-group">
@@ -133,7 +133,9 @@
         <div id="messageBox" class="mt-4 p-3 bg-red-100 text-red-700 border border-red-200 rounded-lg hidden"></div>
     </div>
 
-    <script>
+    <script type="module">
+        import config from './config.js';
+
         document.addEventListener('DOMContentLoaded', () => {
             const promptInput = document.getElementById('promptInput');
             const aspectRatioSelect = document.getElementById('aspectRatioSelect');
@@ -157,8 +159,19 @@
                 messageBox.classList.add('hidden');
             }
 
+            // Function to validate API key
+            function validateApiKey() {
+                if (!config.API_KEY || config.API_KEY === 'SUA_CHAVE_API_AQUI') {
+                    showMessage("Por favor, configure sua chave API no arquivo config.js", true);
+                    return false;
+                }
+                return true;
+            }
+
             // Event listener for the Generate button
             generateButton.addEventListener('click', async () => {
+                if (!validateApiKey()) return;
+
                 const prompt = promptInput.value.trim();
                 if (!prompt) {
                     showMessage("Por favor, insira uma descrição para a imagem.", true);
@@ -190,14 +203,16 @@
                             "height": height
                         }
                     };
-                    const apiKey = ""; // Canvas will automatically provide this in runtime
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
 
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(`${config.API_URL}?key=${config.API_KEY}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
                     const result = await response.json();
 
@@ -211,7 +226,7 @@
                         console.error("API response error:", result);
                     }
                 } catch (error) {
-                    showMessage("Ocorreu um erro durante a geração da imagem. Por favor, tente novamente.", true);
+                    showMessage(`Erro ao gerar imagem: ${error.message}`, true);
                     console.error("Fetch error:", error);
                 } finally {
                     loadingSpinner.style.display = 'none';
