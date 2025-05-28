@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Imagens</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" xintegrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXLLl9K6KQrppjg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* Hidden by default */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .image-display-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px; /* Space between image and icon */
+        }
+        #downloadIcon {
+            cursor: pointer;
+            font-size: 1.8em; /* Slightly larger for better visibility */
+            color: #6b7280; /* Gray color for discreteness */
+            transition: color 0.3s ease-in-out;
+        }
+        #downloadIcon:hover {
+            color: #3b82f6; /* Blue on hover */
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            font-size: 1rem;
+            color: #4a5568;
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3' stroke='%234A5568' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Gerador de Imagens</h1>
+        <p class="text-gray-600 mb-6">Insira uma descrição e escolha o aspeto para gerar uma imagem.</p>
+
+        <div class="form-group">
+            <label for="promptInput">Descrição da Imagem:</label>
+            <textarea
+                id="promptInput"
+                class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                placeholder="Descreva a imagem que você quer gerar..."
+            >A cozy and cheerful church cafeteria on a sunny afternoon. Volunteers are smiling and serving delicious, freshly fried Brazilian pastel to happy customers. A warm, welcoming atmosphere with colorful banners, a rustic counter, people chatting, and families enjoying snacks. Soft light enters through windows, pastel steam rises, and the scent of fried dough fills the air. The church is visible in the background, adding a community feel.</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="aspectRatioSelect">Escolher Aspeto:</label>
+            <select id="aspectRatioSelect" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+                <option value="768x768">Quadrado (1:1)</option>
+                <option value="1024x576">Paisagem (16:9)</option>
+                <option value="576x1024">Retrato (9:16)</option>
+                <option value="1024x768">Padrão (4:3)</option>
+            </select>
+        </div>
+
+        <button
+            id="generateButton"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+        >
+            Gerar Imagem
+        </button>
+
+        <div id="loadingSpinner" class="loading-spinner"></div>
+
+        <div id="imageDisplayArea" class="mt-8 image-display-area hidden">
+            <img id="generatedImage" src="" alt="Imagem Gerada">
+            <i id="downloadIcon" class="fas fa-download" title="Baixar imagem"></i>
+        </div>
+
+        <div id="messageBox" class="mt-4 p-3 bg-red-100 text-red-700 border border-red-200 rounded-lg hidden"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const promptInput = document.getElementById('promptInput');
+            const aspectRatioSelect = document.getElementById('aspectRatioSelect');
+            const generateButton = document.getElementById('generateButton');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const generatedImage = document.getElementById('generatedImage');
+            const downloadIcon = document.getElementById('downloadIcon');
+            const imageDisplayArea = document.getElementById('imageDisplayArea');
+            const messageBox = document.getElementById('messageBox');
+            let currentImageURL = null;
+
+            // Function to display messages
+            function showMessage(message, isError = false) {
+                messageBox.textContent = message;
+                messageBox.className = `mt-4 p-3 rounded-lg ${isError ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-green-100 text-green-700 border border-green-200'}`;
+                messageBox.classList.remove('hidden');
+            }
+
+            // Function to hide messages
+            function hideMessage() {
+                messageBox.classList.add('hidden');
+            }
+
+            // Event listener for the Generate button
+            generateButton.addEventListener('click', async () => {
+                const prompt = promptInput.value.trim();
+                if (!prompt) {
+                    showMessage("Por favor, insira uma descrição para a imagem.", true);
+                    return;
+                }
+
+                const selectedAspectRatio = aspectRatioSelect.value;
+                const [widthStr, heightStr] = selectedAspectRatio.split('x');
+                const width = parseInt(widthStr, 10);
+                const height = parseInt(heightStr, 10);
+
+                if (isNaN(width) || isNaN(height)) {
+                    showMessage("Erro: Aspeto inválido selecionado.", true);
+                    return;
+                }
+
+                loadingSpinner.style.display = 'block';
+                imageDisplayArea.classList.add('hidden');
+                generatedImage.src = '';
+                currentImageURL = null;
+                hideMessage();
+
+                try {
+                    const payload = {
+                        instances: { prompt: prompt },
+                        parameters: {
+                            "sampleCount": 1,
+                            "width": width,
+                            "height": height
+                        }
+                    };
+                    const apiKey = ""; // Canvas will automatically provide this in runtime
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                        currentImageURL = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                        generatedImage.src = currentImageURL;
+                        imageDisplayArea.classList.remove('hidden');
+                        showMessage("Imagem gerada com sucesso!");
+                    } else {
+                        showMessage("Falha ao gerar imagem. Nenhum dado de imagem válido recebido.", true);
+                        console.error("API response error:", result);
+                    }
+                } catch (error) {
+                    showMessage("Ocorreu um erro durante a geração da imagem. Por favor, tente novamente.", true);
+                    console.error("Fetch error:", error);
+                } finally {
+                    loadingSpinner.style.display = 'none';
+                }
+            });
+
+            // Event listener for the download icon
+            downloadIcon.addEventListener('click', () => {
+                if (currentImageURL) {
+                    const a = document.createElement('a');
+                    a.href = currentImageURL;
+                    a.download = 'imagem_gerada.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    showMessage("Nenhuma imagem foi gerada ainda para baixar.", true);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
