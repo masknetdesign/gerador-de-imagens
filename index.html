@@ -142,7 +142,7 @@
 
         // Determinar se estamos rodando localmente ou no GitHub Pages
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const proxyUrl = isLocalhost ? 'http://localhost:5000/generate-image' : 'https://cors-anywhere.herokuapp.com/https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict';
+        const proxyUrl = isLocalhost ? 'http://localhost:5000/generate-image' : 'https://us-central1-masknetdesign.cloudfunctions.net/proxy';
 
         document.addEventListener('DOMContentLoaded', () => {
             const promptInput = document.getElementById('promptInput');
@@ -211,18 +211,24 @@
                     };
 
                     console.log("Enviando payload:", JSON.stringify(payload, null, 2));
+                    console.log("Usando URL:", proxyUrl);
 
                     const response = await fetch(proxyUrl, {
                         method: 'POST',
                         headers: { 
-                            'Content-Type': 'application/json',
-                            'Origin': window.location.origin
+                            'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({
+                            ...payload,
+                            apiKey: config.API_KEY,
+                            apiUrl: config.API_URL
+                        })
                     });
 
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        const errorText = await response.text();
+                        console.error("Erro da API:", errorText);
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                     }
 
                     const result = await response.json();

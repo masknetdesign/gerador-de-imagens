@@ -1,0 +1,10 @@
+{
+  "name": "proxy",
+  "version": "1.0.0",
+  "description": "Proxy para a API do Google Imagen",
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "node-fetch": "^2.6.1"
+  }
+} 
