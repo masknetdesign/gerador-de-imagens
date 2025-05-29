@@ -1,8 +1,22 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 import requests
 import json
 
 app = Flask(__name__)
+
+# Configure CORS
+CORS(app, 
+     resources={
+         r"/*": {
+             "origins": ["https://masknetdesign.github.io"],
+             "methods": ["GET", "POST", "OPTIONS"],
+             "allow_headers": ["Content-Type"],
+             "expose_headers": ["Content-Type"],
+             "supports_credentials": False,
+             "max_age": 3600
+         }
+     })
 
 @app.route('/', methods=['GET'])
 def home():
@@ -20,14 +34,6 @@ def health():
 
 @app.route('/generate-image', methods=['POST', 'OPTIONS'])
 def generate_image():
-    # Handle preflight request
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        return response
-
     try:
         # Log request details
         print("Request Origin:", request.headers.get('Origin'))
@@ -53,22 +59,16 @@ def generate_image():
         # Se houver erro, mostrar detalhes
         if response.status_code != 200:
             print("Erro da API:", response.text)
-            error_response = jsonify({'error': response.text})
-            error_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
-            return error_response, response.status_code
+            return jsonify({'error': response.text}), response.status_code
         
         # Retornar a resposta da API
         result = response.json()
         print("Resposta da API:", json.dumps(result, indent=2))
-        success_response = jsonify(result)
-        success_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
-        return success_response
+        return jsonify(result)
         
     except Exception as e:
         print("Erro no proxy:", str(e))
-        error_response = jsonify({'error': str(e)})
-        error_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
-        return error_response, 500
+        return jsonify({'error': str(e)}), 500
 
 @app.errorhandler(404)
 def not_found(error):
