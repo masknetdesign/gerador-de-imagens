@@ -142,7 +142,7 @@
 
         // Determinar se estamos rodando localmente ou no GitHub Pages
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const proxyUrl = isLocalhost ? 'http://localhost:5000/generate-image' : 'https://us-central1-masknetdesign.cloudfunctions.net/proxy';
+        const proxyUrl = 'http://localhost:5000/generate-image';
 
         document.addEventListener('DOMContentLoaded', () => {
             const promptInput = document.getElementById('promptInput');
@@ -218,11 +218,7 @@
                         headers: { 
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            ...payload,
-                            apiKey: config.API_KEY,
-                            apiUrl: config.API_URL
-                        })
+                        body: JSON.stringify(payload)
                     });
 
                     if (!response.ok) {

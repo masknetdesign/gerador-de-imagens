@@ -18,6 +18,7 @@ def generate_image():
         api_url = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict'
         
         # Fazer a requisição para a API do Google
+        print("Enviando requisição para:", api_url)
         response = requests.post(
             f'{api_url}?key={api_key}',
             json=data,
@@ -30,11 +31,14 @@ def generate_image():
             return jsonify({'error': response.text}), response.status_code
         
         # Retornar a resposta da API
-        return jsonify(response.json()), response.status_code
+        result = response.json()
+        print("Resposta da API:", json.dumps(result, indent=2))
+        return jsonify(result), response.status_code
         
     except Exception as e:
         print("Erro no proxy:", str(e))
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    print("Iniciando servidor proxy na porta 5000...")
     app.run(port=5000) 
