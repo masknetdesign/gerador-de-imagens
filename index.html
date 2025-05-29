@@ -142,7 +142,7 @@
 
         // Determinar se estamos rodando localmente ou no GitHub Pages
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const proxyUrl = 'http://localhost:5000/generate-image';
+        const proxyUrl = isLocalhost ? 'http://localhost:5000/generate-image' : 'https://gerador-imagens-proxy.onrender.com/generate-image';
 
         document.addEventListener('DOMContentLoaded', () => {
             const promptInput = document.getElementById('promptInput');
