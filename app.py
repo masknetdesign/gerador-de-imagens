@@ -4,24 +4,32 @@ import requests
 import json
 
 app = Flask(__name__)
-# Configure CORS to allow requests from GitHub Pages
-CORS(app, resources={
-    r"/*": {
-        "origins": [
-            "https://masknetdesign.github.io",
-            "http://localhost:8000",
-            "http://127.0.0.1:8000"
-        ],
-        "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+
+# Configure CORS to be more permissive
+CORS(app, 
+     resources={r"/*": {
+         "origins": "*",  # Allow all origins
+         "methods": ["GET", "POST", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization", "Accept"],
+         "expose_headers": ["Content-Type", "Authorization"],
+         "supports_credentials": True,
+         "max_age": 3600
+     }},
+     supports_credentials=True)
 
 @app.route('/generate-image', methods=['POST', 'OPTIONS'])
 def generate_image():
+    # Add CORS headers manually
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+        'Access-Control-Max-Age': '3600'
+    }
+    
     if request.method == 'OPTIONS':
         # Handle preflight request
-        return '', 200
+        return ('', 204, headers)
         
     try:
         # Log request details
@@ -48,16 +56,16 @@ def generate_image():
         # Se houver erro, mostrar detalhes
         if response.status_code != 200:
             print("Erro da API:", response.text)
-            return jsonify({'error': response.text}), response.status_code
+            return jsonify({'error': response.text}), response.status_code, headers
         
         # Retornar a resposta da API
         result = response.json()
         print("Resposta da API:", json.dumps(result, indent=2))
-        return jsonify(result), response.status_code
+        return jsonify(result), response.status_code, headers
         
     except Exception as e:
         print("Erro no proxy:", str(e))
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500, headers
 
 if __name__ == '__main__':
     print("Iniciando servidor proxy na porta 5000...")
