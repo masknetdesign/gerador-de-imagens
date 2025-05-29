@@ -4,23 +4,16 @@ import json
 
 app = Flask(__name__)
 
-def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = 'https://masknetdesign.github.io'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    response.headers['Access-Control-Max-Age'] = '3600'
-    return response
-
-@app.after_request
-def after_request(response):
-    return add_cors_headers(response)
-
 @app.route('/generate-image', methods=['POST', 'OPTIONS'])
 def generate_image():
+    # Handle preflight request
     if request.method == 'OPTIONS':
         response = make_response()
-        return add_cors_headers(response)
-        
+        response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+
     try:
         # Log request details
         print("Request Origin:", request.headers.get('Origin'))
@@ -46,16 +39,22 @@ def generate_image():
         # Se houver erro, mostrar detalhes
         if response.status_code != 200:
             print("Erro da API:", response.text)
-            return add_cors_headers(jsonify({'error': response.text})), response.status_code
+            error_response = jsonify({'error': response.text})
+            error_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
+            return error_response, response.status_code
         
         # Retornar a resposta da API
         result = response.json()
         print("Resposta da API:", json.dumps(result, indent=2))
-        return add_cors_headers(jsonify(result)), response.status_code
+        success_response = jsonify(result)
+        success_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
+        return success_response
         
     except Exception as e:
         print("Erro no proxy:", str(e))
-        return add_cors_headers(jsonify({'error': str(e)})), 500
+        error_response = jsonify({'error': str(e)})
+        error_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
+        return error_response, 500
 
 if __name__ == '__main__':
     print("Iniciando servidor proxy na porta 5000...")
