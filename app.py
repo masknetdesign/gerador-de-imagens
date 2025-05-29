@@ -4,6 +4,20 @@ import json
 
 app = Flask(__name__)
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        'status': 'online',
+        'message': 'Proxy server is running'
+    })
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        'status': 'healthy',
+        'message': 'Server is healthy'
+    })
+
 @app.route('/generate-image', methods=['POST', 'OPTIONS'])
 def generate_image():
     # Handle preflight request
@@ -55,6 +69,20 @@ def generate_image():
         error_response = jsonify({'error': str(e)})
         error_response.headers.add('Access-Control-Allow-Origin', 'https://masknetdesign.github.io')
         return error_response, 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'error': 'Not Found',
+        'message': 'The requested URL was not found on the server'
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        'error': 'Internal Server Error',
+        'message': 'An unexpected error occurred'
+    }), 500
 
 if __name__ == '__main__':
     print("Iniciando servidor proxy na porta 5000...")
