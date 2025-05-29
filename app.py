@@ -4,11 +4,31 @@ import requests
 import json
 
 app = Flask(__name__)
-CORS(app)
+# Configure CORS to allow requests from GitHub Pages
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://masknetdesign.github.io",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000"
+        ],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
-@app.route('/generate-image', methods=['POST'])
+@app.route('/generate-image', methods=['POST', 'OPTIONS'])
 def generate_image():
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        return '', 200
+        
     try:
+        # Log request details
+        print("Request Origin:", request.headers.get('Origin'))
+        print("Request Method:", request.method)
+        print("Request Headers:", dict(request.headers))
+        
         # Obter os dados da requisição
         data = request.json
         print("Payload recebido:", json.dumps(data, indent=2))
